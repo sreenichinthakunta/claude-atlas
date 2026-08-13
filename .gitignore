@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# Local Claude Code state — never publish these.
+.claude/settings.local.json
+.preview/
+
+# Generated output. These embed session titles and prompt text from your own
+# transcripts, so they must never be committed to a public repo.
+*.html
+atlas.json
+usage.json

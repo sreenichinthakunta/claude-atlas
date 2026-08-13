@@ -1,0 +1,20 @@
+{
+  "name": "claude-atlas",
+  "displayName": "Claude Atlas",
+  "description": "Navigate your Claude chats and code projects as a folder tree, with a right-side panel visualizing how each Claude model consumes tokens.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Sreeni Chinthakunta",
+    "url": "https://github.com/sreenichinthakunta"
+  },
+  "homepage": "https://github.com/sreenichinthakunta/claude-atlas",
+  "license": "MIT",
+  "keywords": [
+    "tokens",
+    "usage",
+    "cost",
+    "navigation",
+    "dashboard",
+    "analytics"
+  ]
+}
