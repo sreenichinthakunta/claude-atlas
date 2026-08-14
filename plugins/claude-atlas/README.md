@@ -35,10 +35,54 @@ Requires Python 3.9+ (standard library only — no pip installs).
 
 | Command | Does |
 |---|---|
-| `/atlas` | Build the dashboard and open it. `--no-tree` skips the filesystem walk; `--no-open` just prints the path. |
+| `/atlas` | Build the dashboard and open it (static file). |
+| `/atlas-live` | Start the local server: live session view + editable memories. |
 | `/atlas-tokens [model\|project\|session]` | Terminal breakdown with bars. |
-| `/atlas-savings` | Cheaper-model suggestions + non-model cost levers. |
+| `/atlas-savings` | Cheaper-model suggestions + non-model cost levers, in the terminal. |
 | `/atlas-tree [project]` | Folder structure + sessions for one project. |
+
+The dashboard has five tabs: **Usage** (the original nav + charts view),
+**Savings**, **Context**, **Access**, **Live**.
+
+## Context — MCP servers and memories at a glance
+
+Everything Claude Code already tracks locally, in one place:
+
+- **MCP servers** — name, scope (user/project), transport, and which env vars
+  it expects (values are never shown — only presence and a secret-like flag)
+- **Project trust** — every directory Claude has been granted trust in, with
+  allowed-tool and MCP-server counts, and whether the path still exists on disk
+- **Memories** — every file under each project's `memory/` directory, with
+  description, size, and `[[links]]` between them (including dangling ones)
+
+Static `/atlas` shows this read-only, embedded at build time. `/atlas-live`
+makes memory files **editable in place** — a `file://` page can't write to
+disk, so editing needs the local server. Every save keeps a `.bak` of the
+previous version.
+
+## Access — what Claude is allowed to do
+
+Reads every settings layer that applies on this machine — managed org policy,
+user settings, and each project's `.claude/settings.json` /
+`settings.local.json` — and shows the effective picture: allow/deny/ask rules
+grouped by tool, trusted directories, hooks (which run automatically, so
+they're listed as code you should trust), and enabled plugins.
+
+It also flags things worth a look: allow rules with no matching deny rules,
+no deny rules configured at all, an unusually large trusted-directory count.
+These are observations, not a security scan — read them, don't just trust them.
+
+## Live — what's happening right now
+
+`/atlas-live` starts a server bound to **127.0.0.1 only**, with a per-run
+token required on every request (embedded in the URL it prints). It tails
+whichever transcript is most recently modified and refreshes every few
+seconds: tokens per turn, cache hit rate, which tools fired, stop reasons.
+
+**Be clear about the limit:** this cannot show Claude's internal reasoning or
+"the algorithm." That is not written anywhere Atlas can read — by default,
+thinking blocks are recorded with empty text. What Live shows is everything
+that *is* on disk, refreshed fast, not a window into the model itself.
 
 ## Finding cheaper-model opportunities
 

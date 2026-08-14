@@ -152,6 +152,79 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);
 .note{font-size:11px;color:var(--fg-faint);margin-top:9px;line-height:1.45}
 .warnbox{border:1px solid var(--warn);background:color-mix(in srgb,var(--warn) 8%,transparent);
   border-radius:9px;padding:10px;font-size:12px;margin-bottom:10px}
+/* wide views hide the nav + side rails */
+body.wide .layout{grid-template-columns:minmax(0,1fr)}
+body.wide #nav,body.wide #side,body.wide #filters{display:none}
+
+/* savings redesign */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;
+  padding:16px;border-radius:12px;background:linear-gradient(135deg,
+  color-mix(in srgb,var(--good) 13%,transparent),transparent);border:1px solid var(--line)}
+.hero .big{font-size:38px;font-weight:700;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;color:var(--good);line-height:1}
+.hero .cap{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-faint)}
+.hero .of{font-size:12.5px;color:var(--fg-dim);margin-top:5px}
+.gauge{height:9px;border-radius:5px;background:var(--panel-2);overflow:hidden;margin-top:9px;display:flex}
+.gauge i{display:block;height:100%;background:var(--good)}
+
+.rc{border:1px solid var(--line);border-radius:11px;padding:0;margin-bottom:10px;
+  overflow:hidden;background:var(--panel)}
+.rc-top{display:flex;gap:12px;align-items:flex-start;padding:12px 13px;cursor:pointer}
+.rc-top:hover{background:var(--hover)}
+.rc-rank{font-family:var(--mono);font-size:11px;color:var(--fg-faint);width:18px;
+  flex:none;padding-top:2px}
+.rc-main{flex:1;min-width:0}
+.rc-title{font-size:13.5px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-sub{font-size:11px;color:var(--fg-faint);margin-top:2px;display:flex;gap:7px;
+  align-items:center;flex-wrap:wrap}
+.rc-right{text-align:right;flex:none}
+.rc-save{font-family:var(--mono);font-size:16px;font-weight:650;color:var(--good);line-height:1.15}
+.rc-pct{font-size:10.5px;color:var(--fg-faint);font-variant-numeric:tabular-nums}
+.flow{display:flex;align-items:center;gap:7px;margin-top:9px;flex-wrap:wrap}
+.pill{font-family:var(--mono);font-size:11px;padding:2.5px 8px;border-radius:999px;
+  border:1px solid var(--line);background:var(--panel-2);white-space:nowrap}
+.pill.to{border-color:var(--good);color:var(--good)}
+.arrow{color:var(--fg-faint);font-size:12px}
+.rc-body{padding:0 13px 12px 43px;display:none}
+.rc.open .rc-body{display:block}
+.evid{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:7px;margin:2px 0 10px}
+.ev{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+.ev .n{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-faint)}
+.ev .v{font-size:15px;font-weight:650;font-variant-numeric:tabular-nums;margin-top:1px}
+.ev .m{font-size:10px;color:var(--fg-faint)}
+.chev{color:var(--fg-faint);font-size:10px;transition:transform .14s;flex:none;padding-top:4px}
+.rc.open .chev{transform:rotate(90deg)}
+
+/* context / access */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
+.item{border:1px solid var(--line);border-radius:9px;padding:10px 11px;margin-bottom:8px;
+  background:var(--panel-2)}
+.item h4{margin:0 0 3px;font-size:12.5px;font-weight:650;display:flex;
+  justify-content:space-between;gap:8px;align-items:baseline}
+.item p{margin:2px 0 0;font-size:11.5px;color:var(--fg-dim);line-height:1.45}
+.mono{font-family:var(--mono);font-size:10.5px;color:var(--fg-faint);word-break:break-all}
+textarea{width:100%;min-height:230px;font-family:var(--mono);font-size:11.5px;
+  line-height:1.55;padding:10px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel-2);color:var(--fg);resize:vertical}
+.acts{display:flex;gap:7px;align-items:center;margin-top:8px}
+.ok{color:var(--good);font-size:11.5px}
+.err{color:var(--bad);font-size:11.5px}
+.finding{border-left:3px solid var(--fg-faint);padding:8px 11px;border-radius:0 8px 8px 0;
+  background:var(--panel-2);margin-bottom:7px;font-size:12px}
+.finding.warn{border-left-color:var(--warn)}
+.finding.info{border-left-color:var(--accent)}
+
+/* live */
+.pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);
+  margin-right:6px;animation:pl 1.6s ease-in-out infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.25}}
+.ev-row{display:grid;grid-template-columns:56px 1fr auto;gap:9px;padding:5px 7px;
+  border-bottom:1px solid var(--line);font-size:12px;align-items:center}
+.ev-row:last-child{border-bottom:0}
+.ev-row .t{font-family:var(--mono);font-size:10.5px;color:var(--fg-faint)}
+.ev-row .tools{display:flex;gap:4px;flex-wrap:wrap}
+.ttag{font-size:10px;padding:1px 6px;border-radius:999px;background:var(--sel);
+  color:var(--fg-dim);font-family:var(--mono)}
 svg{display:block;max-width:100%}
 .donut-mid{text-anchor:middle;font-variant-numeric:tabular-nums}
 .donut-mid .big{font-size:19px;font-weight:650;fill:var(--fg)}
@@ -174,6 +247,13 @@ svg{display:block;max-width:100%}
 <body>
 <header>
   <h1>Claude Atlas <span id="hcount"></span></h1>
+  <div class="seg" role="tablist" id="views">
+    <button data-v="usage"   aria-pressed="true">Usage</button>
+    <button data-v="savings" aria-pressed="false">Savings</button>
+    <button data-v="context" aria-pressed="false">Context</button>
+    <button data-v="access"  aria-pressed="false">Access</button>
+    <button data-v="live"    aria-pressed="false">Live</button>
+  </div>
   <div class="spacer"></div>
   <div class="seg" role="group" aria-label="Measure">
     <button id="mTok" aria-pressed="true">Tokens</button>
@@ -212,15 +292,22 @@ svg{display:block;max-width:100%}
 </div>
 
 <script id="atlas-data" type="application/json">__DATA__</script>
+<script id="atlas-env" type="application/json">__ENV__</script>
 <script>
 "use strict";
 const DATA = JSON.parse(document.getElementById("atlas-data").textContent);
+let ENV = JSON.parse(document.getElementById("atlas-env").textContent);
+/* Live mode is available only when served by live.py, which supplies a token. */
+const TOKEN = new URLSearchParams(location.search).get("t") || "";
+const LIVE = location.protocol.startsWith("http") && !!TOKEN;
+const api = (p, q) => `${p}?t=${encodeURIComponent(TOKEN)}${q ? "&" + q : ""}`;
 const P = DATA.pricing;
 const KEYS  = ["input","output","cache_read","cache_creation"];
 const LABEL = {input:"Input",output:"Output",cache_read:"Cache read",cache_creation:"Cache write"};
 const CVAR  = {input:"--c-input",output:"--c-output",cache_read:"--c-read",cache_creation:"--c-write"};
 
 let measure = "tokens";
+let view = "usage";
 let sel = {kind:"all"};
 let sortBy = {key:"cost", dir:-1};
 const filters = {q:"", project:"", model:"", days:0, minCost:0, recOnly:false};
@@ -456,39 +543,79 @@ function renderSide(){
       Thinking text is omitted by default, so depth isn't measurable — only presence.</div></div>`;
 }
 
-/* ---------- savings ---------- */
-function recCard(s,p){
-  const r=s.recommendation;
-  return `<div class="rec ${r.confidence}">
-    <div class="rec-h"><b>${esc(s.title||"Untitled session")}</b><span class="save">save ${usd(r.saving)}</span></div>
-    <div class="tag">${esc(p?p.name:"")} · <span class="badge ${r.confidence}">${r.confidence} confidence</span></div>
-    <ul class="why">${r.reasons.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
-    <div class="swap">${esc(r.from)} → ${esc(r.target)} &nbsp;·&nbsp; ${usd(r.current_cost)} → ${usd(r.projected_cost)}</div>
-  </div>`;
+/* ---------- savings (redesigned) ---------- */
+const EVID=[
+  {k:"turns", n:"Turns", f:m=>num(m.turns), m:()=>"conversation length"},
+  {k:"avg_output", n:"Avg reply", f:m=>abbr(m.avg_output), m:()=>"output tokens/turn"},
+  {k:"thinking_rate", n:"Reasoning", f:m=>(m.thinking_rate*100).toFixed(0)+"%", m:()=>"of turns"},
+  {k:"heavy_tool_ratio", n:"Edit / exec", f:m=>(m.heavy_tool_ratio*100).toFixed(0)+"%", m:()=>"of tool calls"},
+];
+function recCard(s,p,rank){
+  const r=s.recommendation, m=r.metrics;
+  const pct=r.current_cost?(r.saving/r.current_cost*100):0;
+  return `<div class="rc" data-rc>
+    <div class="rc-top">
+      <span class="rc-rank">${rank}</span>
+      <span class="rc-main">
+        <span class="rc-title">${esc(s.title||"Untitled session")}</span>
+        <span class="rc-sub"><span>${esc(p?p.name:"")}</span>
+          <span class="badge ${r.confidence}">${r.confidence}</span>
+          <span>${num(m.turns)} turns</span></span>
+        <span class="flow"><span class="pill">${esc(r.from.replace("claude-",""))}</span>
+          <span class="arrow">→</span>
+          <span class="pill to">${esc(r.target.replace("claude-",""))}</span>
+          <span class="mono">${usd(r.current_cost)} → ${usd(r.projected_cost)}</span></span>
+      </span>
+      <span class="rc-right"><span class="rc-save">${usd(r.saving)}</span>
+        <span class="rc-pct">−${pct.toFixed(0)}%</span></span>
+      <span class="chev">▶</span>
+    </div>
+    <div class="rc-body">
+      <div class="evid">${EVID.map(e=>`<div class="ev"><div class="n">${e.n}</div>
+        <div class="v">${e.f(m)}</div><div class="m">${e.m()}</div></div>`).join("")}</div>
+      <div class="tag" style="margin-bottom:4px">Why this was flagged</div>
+      <ul class="why">${r.reasons.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+      <div class="note">Confidence is <b>${r.confidence}</b> because
+        ${r.reasons.length} independent signal${r.reasons.length===1?"":"s"} support this.
+        ${r.reasons.length===1?"A single signal is weak evidence — verify before acting.":""}</div>
+    </div></div>`;
 }
-function savingsSection(list){
+function wireRecs(root){
+  root.querySelectorAll("[data-rc] .rc-top").forEach(t=>t.addEventListener("click",()=>
+    t.parentElement.classList.toggle("open")));
+}
+function savingsSection(list,expanded){
   const recs=list.filter(x=>x.s.recommendation)
     .sort((a,b)=>b.s.recommendation.saving-a.s.recommendation.saving);
   const total=recs.reduce((a,x)=>a+x.s.recommendation.saving,0);
-  let h=`<div class="card"><h3><span>Cheaper-model suggestions</span><span>${recs.length}</span></h3>`;
-  if(!recs.length){
-    h+=`<div class="empty">No downgrade candidates in this selection. That's a real
-      result, not an empty state: these sessions show reasoning and edit/exec activity
-      consistent with work that needs a frontier model.</div></div>`;
-    return h;
-  }
-  h+=`<div class="kpis" style="margin-bottom:11px">
-      <div class="kpi"><div class="k">Potential saving</div><div class="v">${usd(total)}</div>
-        <div class="s">across ${recs.length} sessions</div></div>
-      <div class="kpi"><div class="k">Share of spend</div>
-        <div class="v">${(total/(DATA.cost||1)*100).toFixed(1)}%</div><div class="s">of ${usd(DATA.cost)}</div></div>
+  const spend=aggregate(list).cost||1;
+  if(!recs.length) return `<div class="card"><h3>Cheaper-model suggestions</h3>
+    <div class="empty"><b>No downgrade candidates here.</b><br>That's a finding, not an
+    empty state — these sessions show reasoning and edit/exec activity consistent with
+    work that needs a frontier model. Atlas only suggests a change when it can state a
+    reason that is literally true of the data.</div></div>`;
+  const byTier={};
+  recs.forEach(x=>{const t=x.s.recommendation.target;
+    byTier[t]=(byTier[t]||0)+x.s.recommendation.saving;});
+  const share=total/spend*100;
+  let h=`<div class="card">
+    <div class="hero">
+      <div><div class="cap">Potential saving</div><div class="big">${usd(total)}</div>
+        <div class="of">${recs.length} of ${list.length} sessions · ${share.toFixed(1)}% of ${usd(spend)}</div>
+        <div class="gauge"><i style="width:${Math.min(share,100).toFixed(1)}%"></i></div></div>
+      <div>${Object.entries(byTier).sort((a,b)=>b[1]-a[1]).map(([t,v])=>`
+        <div class="mrow"><div class="mtop"><b>→ ${esc(t.replace("claude-",""))}</b><span>${usd(v)}</span></div>
+        <div class="bar"><i style="width:${(v/total*100).toFixed(1)}%;background:var(--good)"></i></div></div>`).join("")}
+        <div class="note">Estimated by repricing the same tokens at the target model's rates.</div></div>
     </div>
-    <div class="warnbox"><b>Read these as prompts to check, not verdicts.</b>
-      Atlas sees behaviour (turns, reply length, reasoning frequency, tool mix), never
-      whether the answer was hard to produce. A low-confidence row rests on a single
-      signal. Trial one session before changing how you work.</div>`;
-  h+=recs.slice(0,12).map(x=>recCard(x.s,x.p)).join("");
-  if(recs.length>12) h+=`<div class="note">+${recs.length-12} more — narrow the filters to see them.</div>`;
+    <div class="warnbox" style="margin-top:12px"><b>These are prompts to check, not verdicts.</b>
+      Atlas reads behaviour — turns, reply length, how often reasoning fired, read vs
+      edit tool mix. It cannot see whether a task was hard. Expand any row for the
+      evidence, and trial one session before changing how you work.</div>`;
+  const show=expanded?recs:recs.slice(0,8);
+  h+=show.map((x,i)=>recCard(x.s,x.p,i+1)).join("");
+  if(recs.length>show.length)
+    h+=`<div class="note">+${recs.length-show.length} more — open the Savings tab or narrow filters.</div>`;
   return h+"</div>";
 }
 function leversSection(){
@@ -554,9 +681,220 @@ function sessionTable(list){
     <div class="scroll"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
     ${rows.length>300?'<div class="note">Showing first 300 — narrow the filters.</div>':""}</div>`;
 }
+/* ---------- context view: MCP + memories ---------- */
+function renderContext(){
+  const M=ENV.memories||{groups:[],total:0,globals:[],dangling_links:[]};
+  const C=ENV.mcp||{servers:[],projects:[],notes:[]};
+  let h=`<div class="card"><h2>Context Claude is carrying</h2>
+    <div class="path">MCP servers, per-project trust, and saved memories</div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">MCP servers</div><div class="v">${C.servers.length}</div>
+        <div class="s">across all scopes</div></div>
+      <div class="kpi"><div class="k">Memories</div><div class="v">${M.total}</div>
+        <div class="s">${M.groups.length} projects</div></div>
+      <div class="kpi"><div class="k">Trusted dirs</div>
+        <div class="v">${C.projects.filter(p=>p.trusted).length}</div>
+        <div class="s">of ${C.projects.length} known</div></div>
+      <div class="kpi"><div class="k">Dangling links</div>
+        <div class="v">${M.dangling_links.length}</div><div class="s">[[refs]] with no file</div></div>
+    </div>
+    ${LIVE?"":`<div class="note">Read-only. Run <b>/atlas-live</b> to edit memories in place.</div>`}
+  </div>`;
+
+  h+=`<div class="card"><h3><span>MCP servers</span><span>${C.servers.length}</span></h3>`;
+  if(!C.servers.length){
+    h+=`<div class="empty">${esc((C.notes||[]).join(" ")||"None configured.")}</div>`;
+  } else {
+    h+=C.servers.map(s=>`<div class="item">
+      <h4><span>${esc(s.name)}</span><span class="tag">${esc(s.scope)} · ${esc(s.type)}</span></h4>
+      ${s.url?`<p class="mono">${esc(s.url)}</p>`:""}
+      ${s.command?`<p class="mono">${esc(s.command)} ${esc((s.args||[]).join(" "))}</p>`:""}
+      ${s.env_keys.length?`<p>env: <span class="mono">${s.env_keys.map(esc).join(", ")}</span>
+        ${s.env_secret_count?`<span class="badge low">${s.env_secret_count} secret-like</span>`:""}</p>`:""}
+      <p class="mono">${esc(s.source)}</p></div>`).join("");
+  }
+  h+=`</div>`;
+
+  h+=`<div class="card"><h3><span>Project trust</span><span>${C.projects.length}</span></h3>
+    <div class="scroll"><table><thead><tr><th>Directory</th><th>Trusted</th>
+    <th class="n">Allowed tools</th><th class="n">MCP</th><th>On disk</th></tr></thead><tbody>${
+    C.projects.map(p=>`<tr><td class="mono">${esc(p.path)}</td>
+      <td>${p.trusted?'<span class="badge high">yes</span>':'<span class="badge">no</span>'}</td>
+      <td class="n">${p.allowed_tools.length}</td><td class="n">${p.server_count}</td>
+      <td>${p.exists?"✓":'<span class="badge low">missing</span>'}</td></tr>`).join("")
+    }</tbody></table></div>
+    <div class="note">Trust is granted per directory and persists. Entries marked
+      missing no longer exist on disk and can be pruned.</div></div>`;
+
+  h+=`<div class="card"><h3><span>Memories</span><span>${M.total}</span></h3>`;
+  if(!M.total) h+=`<div class="empty">No memory files found.</div>`;
+  M.groups.forEach(g=>{
+    h+=`<div style="margin-bottom:14px"><div class="mtop"><b>${esc(g.project_id)}</b>
+      <span>${g.count} files · ${(g.bytes/1024).toFixed(1)} KB</span></div>
+      <div class="mono" style="margin-bottom:6px">${esc(g.dir)}</div>`;
+    g.files.forEach(f=>{
+      h+=`<div class="item"><h4><span>${f.is_index?"📑 ":""}${esc(f.name)}</span>
+        <span class="tag">${(f.size/1024).toFixed(1)} KB</span></h4>
+        ${f.description?`<p>${esc(f.description)}</p>`:""}
+        ${f.links.length?`<p class="tag">links: ${f.links.map(esc).join(", ")}</p>`:""}
+        <div class="acts">
+          <button data-mem="${esc(f.file)}">${LIVE?"Edit":"View"}</button>
+          <span class="mono">${esc(f.file)}</span></div>
+        <div data-editor="${esc(f.file)}"></div></div>`;
+    });
+    h+=`</div>`;
+  });
+  if(M.dangling_links.length) h+=`<div class="note"><b>Dangling links:</b> ${
+    M.dangling_links.map(l=>`${esc(l.from)} → [[${esc(l.to)}]]`).join(", ")}
+    — these point at memories that don't exist yet.</div>`;
+  return h+`</div>`;
+}
+
+async function openMemory(file, host){
+  if(host.dataset.open==="1"){host.innerHTML="";host.dataset.open="0";return;}
+  host.dataset.open="1";
+  let text="", err="";
+  const local=(ENV.memories.groups.flatMap(g=>g.files).find(f=>f.file===file)||{}).raw||"";
+  if(LIVE){
+    try{ const r=await fetch(api("/api/memory","file="+encodeURIComponent(file)));
+      const j=await r.json(); if(j.error) err=j.error; else text=j.text; }
+    catch(e){ err=String(e); }
+  } else { text=local; }
+  if(err){host.innerHTML=`<div class="err">${esc(err)}</div>`;return;}
+  host.innerHTML=`<textarea ${LIVE?"":"readonly"}>${esc(text)}</textarea>
+    <div class="acts">${LIVE?`<button data-save="${esc(file)}">Save</button>`:
+      `<span class="note">Read-only — start <b>/atlas-live</b> to edit. Showing an
+       embedded snapshot (first 8 KB).</span>`}<span class="msg"></span></div>`;
+  const btn=host.querySelector("[data-save]");
+  if(btn) btn.addEventListener("click",async()=>{
+    const ta=host.querySelector("textarea"), msg=host.querySelector(".msg");
+    msg.textContent="saving…"; msg.className="msg";
+    try{
+      const r=await fetch(api("/api/memory"),{method:"POST",
+        headers:{"Content-Type":"application/json","X-Atlas-Token":TOKEN},
+        body:JSON.stringify({file,text:ta.value})});
+      const j=await r.json();
+      if(j.ok){msg.textContent=`saved ${j.bytes} bytes (.bak kept)`;msg.className="msg ok";}
+      else {msg.textContent=j.error||"failed";msg.className="msg err";}
+    }catch(e){msg.textContent=String(e);msg.className="msg err";}
+  });
+}
+
+/* ---------- access view ---------- */
+function renderAccess(){
+  const A=ENV.access||{rules:[],sources:[],hooks:[],findings:[],counts:{},trusted_dirs:[]};
+  const byTool={};
+  A.rules.filter(r=>r.effect==="allow").forEach(r=>byTool[r.tool]=(byTool[r.tool]||0)+1);
+  const tools=Object.entries(byTool).sort((a,b)=>b[1]-a[1]);
+  const mx=tools.length?tools[0][1]:1;
+  let h=`<div class="card"><h2>What Claude is allowed to do</h2>
+    <div class="path">Effective permissions across every settings layer on this machine</div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Allow rules</div><div class="v">${A.counts.allow||0}</div>
+        <div class="s">skip confirmation</div></div>
+      <div class="kpi"><div class="k">Deny rules</div><div class="v">${A.counts.deny||0}</div>
+        <div class="s">hard blocks</div></div>
+      <div class="kpi"><div class="k">Ask rules</div><div class="v">${A.counts.ask||0}</div>
+        <div class="s">force a prompt</div></div>
+      <div class="kpi"><div class="k">Trusted dirs</div><div class="v">${A.trusted_dirs.length}</div>
+        <div class="s">persist across sessions</div></div>
+      <div class="kpi"><div class="k">Hooks</div><div class="v">${A.hooks.length}</div>
+        <div class="s">run automatically</div></div>
+      <div class="kpi"><div class="k">Plugins</div><div class="v">${(A.enabled_plugins||[]).length}</div>
+        <div class="s">${(A.marketplaces||[]).length} marketplaces</div></div>
+    </div></div>`;
+
+  if(A.findings.length) h+=`<div class="card"><h3>Findings</h3>${
+    A.findings.map(f=>`<div class="finding ${esc(f.level)}">${esc(f.text)}</div>`).join("")}</div>`;
+
+  h+=`<div class="card"><h3><span>Allow rules by tool</span><span>${A.counts.allow||0}</span></h3>`;
+  h+=tools.length?tools.slice(0,18).map(([t,c])=>`<div class="mrow">
+      <div class="mtop"><b>${esc(t)}</b><span>${num(c)}</span></div>
+      <div class="bar" style="width:${(c/mx*100).toFixed(1)}%"><i style="width:100%;background:var(--accent)"></i></div>
+    </div>`).join(""):'<div class="empty">No allow rules.</div>';
+  h+=`<div class="note">Each allow rule lets a matching command run without asking.
+    Review anything that can write, delete, or reach the network.</div></div>`;
+
+  if(A.hooks.length) h+=`<div class="card"><h3>Hooks</h3>${A.hooks.map(x=>`<div class="item">
+    <h4><span>${esc(x.event)}</span><span class="tag">${esc(x.type||"")}</span></h4>
+    <p class="mono">${esc(x.command)}</p><p class="tag">${esc(x.source)}</p></div>`).join("")}
+    <div class="note">Hooks execute automatically. Treat them as trusted code.</div></div>`;
+
+  h+=`<div class="card"><h3><span>Settings layers</span><span>${A.sources.length}</span></h3>
+    <div class="scroll"><table><thead><tr><th>Source</th><th>Path</th><th>Keys</th></tr></thead><tbody>${
+    A.sources.map(s=>`<tr><td>${esc(s.label)}${s.managed?' <span class="badge low">managed</span>':""}</td>
+      <td class="mono">${esc(s.path)}</td><td class="tag">${esc(s.keys.join(", "))}</td></tr>`).join("")
+    }</tbody></table></div>
+    <div class="note">Later layers override earlier ones; managed org policy wins over all.</div></div>`;
+  return h;
+}
+
+/* ---------- live view ---------- */
+let liveTimer=null, livePrev=null;
+function renderLive(){
+  if(!LIVE) return `<div class="card"><h2>Live view</h2>
+    <div class="warnbox"><b>Live needs the local server.</b> A file:// page can't read
+    fresh data or write to disk. Start it with:
+    <div class="mono" style="margin-top:7px">/atlas-live</div>
+    <div style="margin-top:7px">It binds to 127.0.0.1 only and requires a per-run token.</div></div>
+    <div class="note"><b>What live can show:</b> tokens per turn, cache behaviour, which
+    tools fired, stop reasons — everything the transcript records, refreshed every few
+    seconds. <b>What it cannot show:</b> Claude's internal reasoning or algorithms.
+    Those aren't written anywhere Atlas can read, and thinking text is omitted by
+    default. Anything claiming otherwise would be invented.</div></div>`;
+  return `<div class="card"><h2><span class="pulse"></span>Live session</h2>
+    <div class="path" id="lv-file">connecting…</div><div id="lv-kpi"></div></div>
+    <div class="card"><h3>Recent turns</h3><div id="lv-events"></div></div>`;
+}
+async function pollLive(){
+  if(view!=="live"||!LIVE) return;
+  try{
+    const r=await fetch(api("/api/live")); const d=await r.json();
+    const f=document.getElementById("lv-file"); if(!f) return;
+    if(d.error){f.textContent=d.error;return;}
+    const t=d.totals, tot=t.input+t.output+t.cache_read+t.cache_creation;
+    const cached=t.cache_read+t.cache_creation+t.input;
+    const hit=cached?t.cache_read/cached*100:0;
+    const delta=livePrev!==null?tot-livePrev:0; livePrev=tot;
+    f.textContent=`${d.project} · ${d.session.slice(0,8)}`;
+    document.getElementById("lv-kpi").innerHTML=`<div class="kpis">
+      <div class="kpi"><div class="k">Tokens</div><div class="v">${abbr(tot)}</div>
+        <div class="s">${delta>0?"+"+abbr(delta)+" since last poll":"steady"}</div></div>
+      <div class="kpi"><div class="k">Turns</div><div class="v">${num(d.turns)}</div>
+        <div class="s">${num(d.thinking_turns)} with reasoning</div></div>
+      <div class="kpi"><div class="k">Cache hit</div><div class="v">${hit.toFixed(0)}%</div>
+        <div class="s">${abbr(t.cache_read)} read</div></div>
+      <div class="kpi"><div class="k">Output</div><div class="v">${abbr(t.output)}</div>
+        <div class="s">${d.fast_turns?num(d.fast_turns)+" fast turns":"standard"}</div></div>
+      <div class="kpi"><div class="k">Model</div>
+        <div class="v" style="font-size:13px">${esc(Object.keys(d.models)[0]||"—").replace("claude-","")}</div>
+        <div class="s">${Object.keys(d.models).length} in session</div></div>
+    </div>`;
+    document.getElementById("lv-events").innerHTML=d.events.slice().reverse().map(e=>`
+      <div class="ev-row"><span class="t">${e.ts?esc(e.ts.slice(11,19)):"—"}</span>
+      <span class="tools">${e.thinking?'<span class="ttag">reasoning</span>':""}
+        ${e.fast?'<span class="ttag" style="color:var(--warn)">fast</span>':""}
+        ${e.tools.map(t=>`<span class="ttag">${esc(t)}</span>`).join("")||
+          `<span class="tag">${esc(e.stop||"reply")}</span>`}</span>
+      <span class="tag">${abbr(e.total)}</span></div>`).join("")
+      ||'<div class="empty">No turns recorded yet.</div>';
+  }catch(e){/* server stopped; the next tick retries */}
+}
+
 function renderMain(){
   const sc=scope(), list=sc.list;
   let h="";
+  if(view==="context"){document.getElementById("main").innerHTML=renderContext();
+    document.querySelectorAll("[data-mem]").forEach(b=>b.addEventListener("click",()=>
+      openMemory(b.getAttribute("data-mem"),
+        b.closest(".item").querySelector("[data-editor]"))));
+    return;}
+  if(view==="access"){document.getElementById("main").innerHTML=renderAccess();return;}
+  if(view==="live"){document.getElementById("main").innerHTML=renderLive();pollLive();return;}
+  if(view==="savings"){
+    const m=document.getElementById("main");
+    m.innerHTML=savingsSection(list,true)+leversSection();
+    wireRecs(m); return;}
   if(sc.session){
     const s=sc.session;
     h+=`<div class="card"><h2>${esc(s.title||"Untitled session")}</h2>
@@ -582,7 +920,8 @@ function renderMain(){
   }
   const main=document.getElementById("main");
   main.innerHTML=h;
-  main.querySelectorAll("tbody tr").forEach(tr=>tr.addEventListener("click",()=>
+  wireRecs(main);
+  main.querySelectorAll("tbody tr[data-s]").forEach(tr=>tr.addEventListener("click",()=>
     select({kind:"session",pid:tr.getAttribute("data-p"),id:tr.getAttribute("data-s")})));
   main.querySelectorAll("th[data-k]").forEach(th=>th.addEventListener("click",()=>{
     const k=th.getAttribute("data-k");
@@ -651,9 +990,24 @@ function renderNav(){
 }
 
 /* ---------- wiring ---------- */
-function renderAll(){renderNav();renderMain();renderSide();
+const WIDE=new Set(["context","access","live"]);
+function renderAll(){
+  document.body.classList.toggle("wide", WIDE.has(view));
+  if(!WIDE.has(view)){renderNav();renderSide();}
+  renderMain();
   const n=visible().length;
-  document.getElementById("fcount").textContent=`${n} of ${ALL.length} sessions`;}
+  document.getElementById("fcount").textContent=`${n} of ${ALL.length} sessions`;
+}
+function setView(v){
+  view=v;
+  document.querySelectorAll("#views button").forEach(b=>
+    b.setAttribute("aria-pressed",String(b.getAttribute("data-v")===v)));
+  clearInterval(liveTimer); liveTimer=null; livePrev=null;
+  if(v==="live"&&LIVE) liveTimer=setInterval(pollLive,3000);
+  renderAll();
+}
+document.getElementById("views").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-v]"); if(b) setView(b.getAttribute("data-v"));});
 function select(next){sel=next;renderAll();}
 function setMeasure(m){measure=m;
   document.getElementById("mTok").setAttribute("aria-pressed",String(m==="tokens"));
@@ -724,7 +1078,22 @@ def main() -> int:
             cmd.append("--no-tree")
         raw = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
 
-    html = TEMPLATE.replace("__DATA__", raw.replace("</", "<\\/"))
+    # Environment inventory is embedded so the static file works standalone;
+    # live mode re-fetches it from /api/env for fresh state.
+    try:
+        sys.path.insert(0, str(here))
+        import inspect_env
+        env_raw = json.dumps(inspect_env.collect(), separators=(",", ":"))
+    except Exception as exc:  # never let inventory failure break the dashboard
+        env_raw = json.dumps({"error": str(exc), "mcp": {"servers": [], "projects": [], "notes": []},
+                              "memories": {"groups": [], "total": 0, "globals": [], "dangling_links": []},
+                              "access": {"rules": [], "sources": [], "hooks": [], "findings": [],
+                                         "counts": {"allow": 0, "deny": 0, "ask": 0},
+                                         "trusted_dirs": [], "enabled_plugins": [], "marketplaces": []}})
+
+    html = (TEMPLATE
+            .replace("__DATA__", raw.replace("</", "<\\/"))
+            .replace("__ENV__", env_raw.replace("</", "<\\/")))
     out = Path(args.out).expanduser()
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")

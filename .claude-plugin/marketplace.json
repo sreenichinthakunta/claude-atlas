@@ -6,15 +6,15 @@
   },
   "metadata": {
     "description": "Claude Code plugins by Sreeni Chinthakunta",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "plugins": [
     {
       "name": "claude-atlas",
       "displayName": "Claude Atlas",
       "source": "./plugins/claude-atlas",
-      "description": "Navigate Claude chats and code projects as a folder tree, with a right-side token panel, rich filters, and evidence-backed suggestions for where a cheaper model would do.",
-      "version": "1.1.0",
+      "description": "Navigate Claude chats and code projects as a folder tree. See a right-side token panel, evidence-backed cheaper-model suggestions, every MCP server and memory file, the full permission surface, and (via a local server) live session telemetry with editable memories.",
+      "version": "1.2.0",
       "author": {
         "name": "Sreeni Chinthakunta",
         "url": "https://github.com/sreenichinthakunta"
