@@ -27,6 +27,33 @@ MANAGED = [
 ]
 SECRET_HINT = re.compile(r"(key|token|secret|password|auth|credential|bearer)", re.I)
 
+# Patterns for the memory secret-scanner. Each captures a *location*, never
+# the matched text -- collect_memories() records only (file, line, pattern
+# name), so a real key is flagged for the user to rotate without ever being
+# read back to them, logged, or embedded in the dashboard.
+SECRET_PATTERNS = [
+    ("AWS Access Key",      re.compile(r"AKIA[0-9A-Z]{16}")),
+    ("Anthropic API Key",   re.compile(r"sk-ant-[A-Za-z0-9_-]{10,}")),
+    ("OpenAI-style Key",    re.compile(r"\bsk-[A-Za-z0-9]{20,}\b")),
+    ("GitHub Token",        re.compile(r"gh[pousr]_[A-Za-z0-9]{30,}")),
+    ("GitLab Token",        re.compile(r"glpat-[A-Za-z0-9\-_]{20,}")),
+    ("Slack Token",         re.compile(r"xox[baprs]-[A-Za-z0-9-]{10,}")),
+    ("Private Key Block",   re.compile(r"-----BEGIN (RSA |EC |OPENSSH |DSA |)PRIVATE KEY-----")),
+    ("Generic secret assignment", re.compile(
+        r"(?i)\b(api[_-]?key|secret|password|token)\b\s*[:=]\s*['\"][A-Za-z0-9_\-/+=]{16,}['\"]")),
+]
+
+
+def scan_secrets(text: str, location: str) -> list[dict]:
+    """Flag lines that look like a leaked credential. Never returns the match."""
+    findings = []
+    for i, line in enumerate(text.splitlines(), start=1):
+        for name, pattern in SECRET_PATTERNS:
+            if pattern.search(line):
+                findings.append({"location": location, "line": i, "pattern": name})
+                break  # one flag per line is enough signal
+    return findings
+
 
 def read_json(p: Path) -> dict | None:
     try:
@@ -153,7 +180,7 @@ def parse_memory(path: Path) -> dict:
 
 
 def collect_memories(projects_root: Path) -> dict:
-    groups, total, orphans = [], 0, []
+    groups, total, orphans, secret_flags = [], 0, [], []
     if projects_root.is_dir():
         for pdir in sorted(projects_root.iterdir()):
             mem = pdir / "memory"
@@ -168,6 +195,7 @@ def collect_memories(projects_root: Path) -> dict:
                 for link in f["links"]:
                     if link not in names:
                         orphans.append({"from": f["name"], "to": link, "dir": str(mem)})
+                secret_flags.extend(scan_secrets(f["raw"], f"{pdir.name}/{f['name']}.md"))
             index = next((f for f in files if f["is_index"]), None)
             groups.append({
                 "dir": str(mem),
@@ -182,10 +210,12 @@ def collect_memories(projects_root: Path) -> dict:
     globals_ = []
     for cand in (HOME / ".claude" / "CLAUDE.md", HOME / ".claude" / "MEMORY.md"):
         if cand.is_file():
-            globals_.append(parse_memory(cand))
+            g = parse_memory(cand)
+            globals_.append(g)
+            secret_flags.extend(scan_secrets(g["raw"], cand.name))
     groups.sort(key=lambda g: -g["count"])
     return {"groups": groups, "total": total, "globals": globals_,
-            "dangling_links": orphans[:50]}
+            "dangling_links": orphans[:50], "secret_flags": secret_flags[:50]}
 
 
 # --------------------------------------------------------------------------

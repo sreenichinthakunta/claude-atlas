@@ -36,13 +36,13 @@ Requires Python 3.9+ (standard library only — no pip installs).
 | Command | Does |
 |---|---|
 | `/atlas` | Build the dashboard and open it (static file). |
-| `/atlas-live` | Start the local server: live session view + editable memories. |
+| `/atlas-edit` | Start the local server so memory files are editable in place. |
 | `/atlas-tokens [model\|project\|session]` | Terminal breakdown with bars. |
 | `/atlas-savings` | Cheaper-model suggestions + non-model cost levers, in the terminal. |
 | `/atlas-tree [project]` | Folder structure + sessions for one project. |
 
-The dashboard has five tabs: **Usage** (the original nav + charts view),
-**Savings**, **Context**, **Access**, **Live**.
+The dashboard has four tabs: **Usage** (the original nav + charts view),
+**Savings**, **Context**, **Access**.
 
 ## Context — MCP servers and memories at a glance
 
@@ -54,8 +54,12 @@ Everything Claude Code already tracks locally, in one place:
   allowed-tool and MCP-server counts, and whether the path still exists on disk
 - **Memories** — every file under each project's `memory/` directory, with
   description, size, and `[[links]]` between them (including dangling ones)
+- **Credential scan** — every memory file and global `CLAUDE.md` is scanned
+  for patterns that look like leaked API keys, tokens, or private key blocks.
+  Atlas never reads back or displays the matched value — only the file, line
+  number, and which pattern matched, so you know what to rotate.
 
-Static `/atlas` shows this read-only, embedded at build time. `/atlas-live`
+Static `/atlas` shows this read-only, embedded at build time. `/atlas-edit`
 makes memory files **editable in place** — a `file://` page can't write to
 disk, so editing needs the local server. Every save keeps a `.bak` of the
 previous version.
@@ -71,18 +75,6 @@ they're listed as code you should trust), and enabled plugins.
 It also flags things worth a look: allow rules with no matching deny rules,
 no deny rules configured at all, an unusually large trusted-directory count.
 These are observations, not a security scan — read them, don't just trust them.
-
-## Live — what's happening right now
-
-`/atlas-live` starts a server bound to **127.0.0.1 only**, with a per-run
-token required on every request (embedded in the URL it prints). It tails
-whichever transcript is most recently modified and refreshes every few
-seconds: tokens per turn, cache hit rate, which tools fired, stop reasons.
-
-**Be clear about the limit:** this cannot show Claude's internal reasoning or
-"the algorithm." That is not written anywhere Atlas can read — by default,
-thinking blocks are recorded with empty text. What Live shows is everything
-that *is* on disk, refreshed fast, not a window into the model itself.
 
 ## Finding cheaper-model opportunities
 
@@ -108,6 +100,11 @@ behaviour, never answer quality. So the design is deliberately conservative:
 If you get no suggestions, that's a real result: reasoning-heavy agentic work
 genuinely needs a frontier model.
 
+Each card has a **Copy switch command** button. It copies `/model <target>`
+to your clipboard — nothing is changed automatically. Atlas has no way to
+know a suggestion is right for your next task, so acting on it is always a
+decision you make, not one it makes for you.
+
 ### Cost levers that aren't model choice
 
 Often the bigger lever. Atlas separates **actionable** from **informational**:
@@ -127,6 +124,10 @@ right-panel charts, and the savings list recompute from the filtered set.
 Search (title / project / branch / model) · project · model · time range
 (7/30/90 days) · minimum cost · savings-only · reset.
 
+**Export CSV / Export JSON** export exactly the sessions the filter bar is
+currently showing — useful for sharing a slice with a team without giving
+anyone access to the raw transcripts or running anything through a server.
+
 ## The dashboard
 
 **Left — navigation.** Two trees: *Chats* (project → session, each with its token
@@ -142,6 +143,10 @@ clickable and drive the right panel.
 - per-model bars, each internally stacked by component
 - usage-over-time area chart
 - cache hit-rate meter
+
+The KPI row also includes **month pace** — spend so far this calendar month,
+linearly projected to month-end. It only appears once at least 2 days of
+data exist in the current scope; a 1-day sample is too noisy to project.
 
 ### The Tokens ⇄ Cost toggle matters more than it sounds
 
@@ -220,17 +225,35 @@ filtered by cheap substring checks before any JSON parsing, and records above
 500 KB are never parsed (a multi-megabyte tool result can contain the literal
 text `"usage"` without being an assistant record).
 
+## What's deliberately not built
+
+Two things came up as natural next steps and were left out on purpose:
+
+- **Auto-switching models or capping spend.** Atlas is a read-only reporting
+  tool. Automating a model change or refusing to let a session continue past
+  a budget would mean trusting a behavioural heuristic with money and with
+  whether your work continues — the same reasoning that keeps the savings
+  suggestions advisory-only. The copy-switch button is the deliberately
+  manual middle ground.
+- **Cloud sync or a team dashboard.** That would mean a server holding your
+  prompt history, which is a materially bigger trust ask than a local
+  reporting tool. CSV/JSON export covers the "share with my team" case
+  without introducing one.
+
 ## Layout
 
 ```
 plugins/claude-atlas/
 ├── .claude-plugin/plugin.json
-├── commands/          atlas.md · atlas-tokens.md · atlas-tree.md
+├── commands/          atlas.md · atlas-edit.md · atlas-tokens.md ·
+│                       atlas-savings.md · atlas-tree.md
 ├── scripts/
-│   ├── collect.py     transcripts + file tree → JSON
-│   ├── dashboard.py   JSON → self-contained HTML
-│   ├── report.py      JSON → terminal bars
-│   └── statusline.py  live current-session line
+│   ├── collect.py      transcripts + file tree → JSON
+│   ├── inspect_env.py  MCP servers, memories, permissions → JSON
+│   ├── dashboard.py    JSON → self-contained HTML
+│   ├── server.py       local server: memory editing + rescans
+│   ├── report.py       JSON → terminal bars
+│   └── statusline.py   live current-session line
 ├── pricing.json
 └── README.md
 ```

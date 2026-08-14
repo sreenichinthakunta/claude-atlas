@@ -214,17 +214,7 @@ textarea{width:100%;min-height:230px;font-family:var(--mono);font-size:11.5px;
 .finding.warn{border-left-color:var(--warn)}
 .finding.info{border-left-color:var(--accent)}
 
-/* live */
-.pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);
-  margin-right:6px;animation:pl 1.6s ease-in-out infinite}
-@keyframes pl{0%,100%{opacity:1}50%{opacity:.25}}
-.ev-row{display:grid;grid-template-columns:56px 1fr auto;gap:9px;padding:5px 7px;
-  border-bottom:1px solid var(--line);font-size:12px;align-items:center}
-.ev-row:last-child{border-bottom:0}
-.ev-row .t{font-family:var(--mono);font-size:10.5px;color:var(--fg-faint)}
-.ev-row .tools{display:flex;gap:4px;flex-wrap:wrap}
-.ttag{font-size:10px;padding:1px 6px;border-radius:999px;background:var(--sel);
-  color:var(--fg-dim);font-family:var(--mono)}
+/* charts */
 svg{display:block;max-width:100%}
 .donut-mid{text-anchor:middle;font-variant-numeric:tabular-nums}
 .donut-mid .big{font-size:19px;font-weight:650;fill:var(--fg)}
@@ -252,7 +242,6 @@ svg{display:block;max-width:100%}
     <button data-v="savings" aria-pressed="false">Savings</button>
     <button data-v="context" aria-pressed="false">Context</button>
     <button data-v="access"  aria-pressed="false">Access</button>
-    <button data-v="live"    aria-pressed="false">Live</button>
   </div>
   <div class="spacer"></div>
   <div class="seg" role="group" aria-label="Measure">
@@ -282,6 +271,9 @@ svg{display:block;max-width:100%}
   </select>
   <button id="frec" aria-pressed="false">Savings only</button>
   <button id="freset">Reset</button>
+  <span class="spacer"></span>
+  <button id="fcsv" title="Export the currently filtered sessions as CSV">Export CSV</button>
+  <button id="fjson" title="Export the currently filtered sessions as JSON">Export JSON</button>
   <span class="chip" id="fcount"></span>
 </div>
 
@@ -297,7 +289,9 @@ svg{display:block;max-width:100%}
 "use strict";
 const DATA = JSON.parse(document.getElementById("atlas-data").textContent);
 let ENV = JSON.parse(document.getElementById("atlas-env").textContent);
-/* Live mode is available only when served by live.py, which supplies a token. */
+/* Editing is available only when served by server.py, which supplies a token
+   in the URL. Opened as a plain file:// page, LIVE is false and everything
+   below falls back to read-only against the data embedded at build time. */
 const TOKEN = new URLSearchParams(location.search).get("t") || "";
 const LIVE = location.protocol.startsWith("http") && !!TOKEN;
 const api = (p, q) => `${p}?t=${encodeURIComponent(TOKEN)}${q ? "&" + q : ""}`;
@@ -578,11 +572,36 @@ function recCard(s,p,rank){
       <div class="note">Confidence is <b>${r.confidence}</b> because
         ${r.reasons.length} independent signal${r.reasons.length===1?"":"s"} support this.
         ${r.reasons.length===1?"A single signal is weak evidence — verify before acting.":""}</div>
+      <div class="acts">
+        <button data-copy="/model ${esc(r.target)}">Copy switch command</button>
+        <span class="msg"></span>
+        <span class="note" style="margin:0">Nothing is changed automatically — this
+          copies the command to run yourself, next time you'd start a session like this.</span>
+      </div>
     </div></div>`;
+}
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); return true; }
+  catch(e){
+    try{
+      const ta=document.createElement("textarea");
+      ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      const ok=document.execCommand("copy"); ta.remove();
+      return ok;
+    }catch(e2){ return false; }
+  }
 }
 function wireRecs(root){
   root.querySelectorAll("[data-rc] .rc-top").forEach(t=>t.addEventListener("click",()=>
     t.parentElement.classList.toggle("open")));
+  root.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",async()=>{
+    const msg=b.nextElementSibling;
+    const ok=await copyText(b.getAttribute("data-copy"));
+    if(msg){msg.textContent=ok?"copied":"couldn't copy — select and copy manually";
+      msg.className=ok?"msg ok":"msg err";
+      setTimeout(()=>{if(msg)msg.textContent="";},2500);}
+  }));
 }
 function savingsSection(list,expanded){
   const recs=list.filter(x=>x.s.recommendation)
@@ -630,9 +649,21 @@ function leversSection(){
 }
 
 /* ---------- centre ---------- */
+function monthProjection(daily){
+  const now=new Date(), ym=now.toISOString().slice(0,7);
+  const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const todayDay=now.getDate();
+  let tokensSoFar=0, activeDays=0;
+  for(const [d,u] of Object.entries(daily||{}))
+    if(d.slice(0,7)===ym){tokensSoFar+=totalOf(u);activeDays++;}
+  if(activeDays<2) return null;
+  const costSoFar=tokensSoFar*_blend;
+  return {costSoFar, projected:costSoFar/todayDay*daysInMonth, daysElapsed:todayDay, daysInMonth, activeDays};
+}
 function kpis(sc){
   const u=sc.usage,t=sc.total_tokens;
   const avgOut=sc.turns?u.output/sc.turns:0;
+  const mp=monthProjection(sc.daily);
   return `<div class="kpis">
     <div class="kpi"><div class="k">Tokens</div><div class="v">${abbr(t)}</div><div class="s">${num(t)}</div></div>
     <div class="kpi"><div class="k">Est. cost</div><div class="v">${usd(sc.cost)}</div><div class="s">list price</div></div>
@@ -645,7 +676,31 @@ function kpis(sc){
       <div class="s">${t?(u.cache_read/t*100).toFixed(1):0}% of tokens</div></div>
     <div class="kpi"><div class="k">Active time</div><div class="v">${dur(sc.duration_minutes)}</div>
       <div class="s">${sc.fast_turns?num(sc.fast_turns)+" fast turns":"standard speed"}</div></div>
+    <div class="kpi"><div class="k">Month pace</div>
+      <div class="v">${mp?usd(mp.projected):"—"}</div>
+      <div class="s">${mp?`${usd(mp.costSoFar)} thru day ${mp.daysElapsed}/${mp.daysInMonth}`:"too few days yet"}</div></div>
   </div>`;
+}
+function toCSV(list){
+  const cols=["Title","Project","Model","Turns","Reasoning %","Tokens","Cost","Suggested saving","Updated"];
+  const esc2=v=>{const s=String(v==null?"":v);
+    return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  const rows=list.map(({s,p})=>[
+    s.title||"Untitled session", p.name, (s.primary_model||"").replace("claude-",""),
+    s.turns, s.turns?(s.thinking_turns/s.turns*100).toFixed(1):0,
+    s.total_tokens, s.cost.toFixed(2),
+    s.recommendation?s.recommendation.saving.toFixed(2):"",
+    s.ended||""
+  ].map(esc2).join(","));
+  return [cols.join(","), ...rows].join("\n");
+}
+function downloadBlob(filename,mime,content){
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 const COLS=[
   {k:"title",  t:"Session",  n:false, v:x=>x.s.title||"Untitled session"},
@@ -698,7 +753,14 @@ function renderContext(){
       <div class="kpi"><div class="k">Dangling links</div>
         <div class="v">${M.dangling_links.length}</div><div class="s">[[refs]] with no file</div></div>
     </div>
-    ${LIVE?"":`<div class="note">Read-only. Run <b>/atlas-live</b> to edit memories in place.</div>`}
+    ${LIVE?"":`<div class="note">Read-only. Run <b>/atlas-edit</b> to edit memories in place.</div>`}
+  </div>`;
+
+  if((M.secret_flags||[]).length) h+=`<div class="warnbox">
+    <b>Possible credentials in memory files</b> — Atlas never reads or displays the
+    matched value, only its location. Review and rotate if real:
+    <ul class="why">${M.secret_flags.map(f=>
+      `<li>${esc(f.location)}, line ${f.line}: looks like a <b>${esc(f.pattern)}</b></li>`).join("")}</ul>
   </div>`;
 
   h+=`<div class="card"><h3><span>MCP servers</span><span>${C.servers.length}</span></h3>`;
@@ -763,7 +825,7 @@ async function openMemory(file, host){
   if(err){host.innerHTML=`<div class="err">${esc(err)}</div>`;return;}
   host.innerHTML=`<textarea ${LIVE?"":"readonly"}>${esc(text)}</textarea>
     <div class="acts">${LIVE?`<button data-save="${esc(file)}">Save</button>`:
-      `<span class="note">Read-only — start <b>/atlas-live</b> to edit. Showing an
+      `<span class="note">Read-only — start <b>/atlas-edit</b> to edit. Showing an
        embedded snapshot (first 8 KB).</span>`}<span class="msg"></span></div>`;
   const btn=host.querySelector("[data-save]");
   if(btn) btn.addEventListener("click",async()=>{
@@ -829,58 +891,6 @@ function renderAccess(){
   return h;
 }
 
-/* ---------- live view ---------- */
-let liveTimer=null, livePrev=null;
-function renderLive(){
-  if(!LIVE) return `<div class="card"><h2>Live view</h2>
-    <div class="warnbox"><b>Live needs the local server.</b> A file:// page can't read
-    fresh data or write to disk. Start it with:
-    <div class="mono" style="margin-top:7px">/atlas-live</div>
-    <div style="margin-top:7px">It binds to 127.0.0.1 only and requires a per-run token.</div></div>
-    <div class="note"><b>What live can show:</b> tokens per turn, cache behaviour, which
-    tools fired, stop reasons — everything the transcript records, refreshed every few
-    seconds. <b>What it cannot show:</b> Claude's internal reasoning or algorithms.
-    Those aren't written anywhere Atlas can read, and thinking text is omitted by
-    default. Anything claiming otherwise would be invented.</div></div>`;
-  return `<div class="card"><h2><span class="pulse"></span>Live session</h2>
-    <div class="path" id="lv-file">connecting…</div><div id="lv-kpi"></div></div>
-    <div class="card"><h3>Recent turns</h3><div id="lv-events"></div></div>`;
-}
-async function pollLive(){
-  if(view!=="live"||!LIVE) return;
-  try{
-    const r=await fetch(api("/api/live")); const d=await r.json();
-    const f=document.getElementById("lv-file"); if(!f) return;
-    if(d.error){f.textContent=d.error;return;}
-    const t=d.totals, tot=t.input+t.output+t.cache_read+t.cache_creation;
-    const cached=t.cache_read+t.cache_creation+t.input;
-    const hit=cached?t.cache_read/cached*100:0;
-    const delta=livePrev!==null?tot-livePrev:0; livePrev=tot;
-    f.textContent=`${d.project} · ${d.session.slice(0,8)}`;
-    document.getElementById("lv-kpi").innerHTML=`<div class="kpis">
-      <div class="kpi"><div class="k">Tokens</div><div class="v">${abbr(tot)}</div>
-        <div class="s">${delta>0?"+"+abbr(delta)+" since last poll":"steady"}</div></div>
-      <div class="kpi"><div class="k">Turns</div><div class="v">${num(d.turns)}</div>
-        <div class="s">${num(d.thinking_turns)} with reasoning</div></div>
-      <div class="kpi"><div class="k">Cache hit</div><div class="v">${hit.toFixed(0)}%</div>
-        <div class="s">${abbr(t.cache_read)} read</div></div>
-      <div class="kpi"><div class="k">Output</div><div class="v">${abbr(t.output)}</div>
-        <div class="s">${d.fast_turns?num(d.fast_turns)+" fast turns":"standard"}</div></div>
-      <div class="kpi"><div class="k">Model</div>
-        <div class="v" style="font-size:13px">${esc(Object.keys(d.models)[0]||"—").replace("claude-","")}</div>
-        <div class="s">${Object.keys(d.models).length} in session</div></div>
-    </div>`;
-    document.getElementById("lv-events").innerHTML=d.events.slice().reverse().map(e=>`
-      <div class="ev-row"><span class="t">${e.ts?esc(e.ts.slice(11,19)):"—"}</span>
-      <span class="tools">${e.thinking?'<span class="ttag">reasoning</span>':""}
-        ${e.fast?'<span class="ttag" style="color:var(--warn)">fast</span>':""}
-        ${e.tools.map(t=>`<span class="ttag">${esc(t)}</span>`).join("")||
-          `<span class="tag">${esc(e.stop||"reply")}</span>`}</span>
-      <span class="tag">${abbr(e.total)}</span></div>`).join("")
-      ||'<div class="empty">No turns recorded yet.</div>';
-  }catch(e){/* server stopped; the next tick retries */}
-}
-
 function renderMain(){
   const sc=scope(), list=sc.list;
   let h="";
@@ -890,7 +900,6 @@ function renderMain(){
         b.closest(".item").querySelector("[data-editor]"))));
     return;}
   if(view==="access"){document.getElementById("main").innerHTML=renderAccess();return;}
-  if(view==="live"){document.getElementById("main").innerHTML=renderLive();pollLive();return;}
   if(view==="savings"){
     const m=document.getElementById("main");
     m.innerHTML=savingsSection(list,true)+leversSection();
@@ -990,7 +999,7 @@ function renderNav(){
 }
 
 /* ---------- wiring ---------- */
-const WIDE=new Set(["context","access","live"]);
+const WIDE=new Set(["context","access"]);
 function renderAll(){
   document.body.classList.toggle("wide", WIDE.has(view));
   if(!WIDE.has(view)){renderNav();renderSide();}
@@ -1002,8 +1011,6 @@ function setView(v){
   view=v;
   document.querySelectorAll("#views button").forEach(b=>
     b.setAttribute("aria-pressed",String(b.getAttribute("data-v")===v)));
-  clearInterval(liveTimer); liveTimer=null; livePrev=null;
-  if(v==="live"&&LIVE) liveTimer=setInterval(pollLive,3000);
   renderAll();
 }
 document.getElementById("views").addEventListener("click",e=>{
@@ -1045,6 +1052,12 @@ document.getElementById("freset").onclick=()=>{
   ["frange","fcost"].forEach(i=>document.getElementById(i).value="0");
   document.getElementById("frec").setAttribute("aria-pressed","false");
   sel={kind:"all"};renderAll();};
+const stamp=()=>new Date().toISOString().slice(0,10);
+document.getElementById("fcsv").onclick=()=>
+  downloadBlob(`claude-atlas-sessions-${stamp()}.csv`,"text/csv",toCSV(visible()));
+document.getElementById("fjson").onclick=()=>
+  downloadBlob(`claude-atlas-sessions-${stamp()}.json`,"application/json",
+    JSON.stringify(visible().map(({s,p})=>({...s,project:p.name,project_path:p.path})),null,2));
 
 document.getElementById("hcount").textContent=
   `· ${DATA.projects.length} projects · ${DATA.session_count} sessions`;

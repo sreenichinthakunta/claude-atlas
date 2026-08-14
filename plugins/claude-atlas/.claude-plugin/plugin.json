@@ -1,8 +1,8 @@
 {
   "name": "claude-atlas",
   "displayName": "Claude Atlas",
-  "description": "Navigate Claude chats and code projects as a folder tree. See a right-side token panel, evidence-backed cheaper-model suggestions, every MCP server and memory file, the full permission surface, and (via a local server) live session telemetry with editable memories.",
-  "version": "1.2.0",
+  "description": "Navigate Claude chats and code projects as a folder tree. See a right-side token panel, evidence-backed cheaper-model suggestions with a one-click switch-command copy, every MCP server and memory file with credential-leak scanning, the full permission surface, and CSV/JSON export.",
+  "version": "1.3.0",
   "author": {
     "name": "Sreeni Chinthakunta",
     "url": "https://github.com/sreenichinthakunta"
