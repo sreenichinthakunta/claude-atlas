@@ -37,7 +37,51 @@ Requires Python 3.9+ (standard library only — no pip installs).
 |---|---|
 | `/atlas` | Build the dashboard and open it. `--no-tree` skips the filesystem walk; `--no-open` just prints the path. |
 | `/atlas-tokens [model\|project\|session]` | Terminal breakdown with bars. |
+| `/atlas-savings` | Cheaper-model suggestions + non-model cost levers. |
 | `/atlas-tree [project]` | Folder structure + sessions for one project. |
+
+## Finding cheaper-model opportunities
+
+Atlas scores each session on four observable signals — turn count, average
+reply length, how often reasoning was engaged, and read-only vs edit/exec tool
+mix — then flags sessions that look routine **relative to your own work** and
+computes what they'd have cost on Sonnet or Haiku.
+
+**What it cannot do:** judge whether a task was actually hard. It sees
+behaviour, never answer quality. So the design is deliberately conservative:
+
+- **Hard disqualifiers first.** Sessions with heavy edit/exec activity are
+  never suggested, regardless of how they rank.
+- **Reasoning is judged relative, not absolute.** Adaptive thinking fires on
+  most Opus turns by default, so an absolute threshold would either flag
+  everything or nothing. Atlas compares against your own median.
+- **Every reason must be true.** A suggestion only appears if a claim like
+  "72% read-only tool use" is literally supported by the metrics. If nothing
+  truthful can be said, no suggestion is made.
+- **Confidence is shown.** `high` = three independent signals; `low` = one.
+  Low-confidence rows are often wrong — trial one before changing anything.
+
+If you get no suggestions, that's a real result: reasoning-heavy agentic work
+genuinely needs a frontier model.
+
+### Cost levers that aren't model choice
+
+Often the bigger lever. Atlas separates **actionable** from **informational**:
+
+- **Fast-mode premium** — turns recorded with `speed=fast` bill at roughly
+  double. Actionable: toggle with `/fast`.
+- **Cache write TTL** — 1-hour writes bill at 2× the input rate vs 1.25× for
+  5-minute. Claude Code picks the TTL, so this is informational, but it is
+  frequently the single largest line item and worth seeing.
+- **Cache hit rate** — long-lived sessions cache better than many short ones.
+
+## Filters
+
+The filter bar drives **every** metric, not just the table — the KPIs, all
+right-panel charts, and the savings list recompute from the filtered set.
+
+Search (title / project / branch / model) · project · model · time range
+(7/30/90 days) · minimum cost · savings-only · reset.
 
 ## The dashboard
 
@@ -97,11 +141,22 @@ path above matches where the plugin actually installed.
 ## Pricing and cost accuracy
 
 Every dollar figure is an **estimate**, not a bill. Rates live in `pricing.json`
-(USD per million tokens); cache reads bill at `cache_read_multiplier` × the input
-rate and writes at `cache_write_multiplier` ×. Defaults use the 5-minute cache
-write rate (1.25×) — change it to `2.0` if you rely on the 1-hour TTL. Unknown or
-newly released models fall back by tier (`opus` / `sonnet` / `haiku`) rather than
-silently costing zero. Edit the file freely; it's read at scan time.
+(USD per million tokens) and are read at scan time — edit freely.
+
+Atlas prices three things most token counters get wrong:
+
+- **Cache writes by actual TTL.** Transcripts record the `ephemeral_1h` /
+  `ephemeral_5m` split. 1-hour writes bill at **2.0×** the input rate, 5-minute
+  at **1.25×**. Assuming a flat 1.25× understated real spend by ~18% on the
+  author's own data, where 100% of writes turned out to be 1-hour.
+- **Fast mode.** Turns with `speed=fast` use the model's premium rates
+  (Opus 5 / 4.8: $10/$50 vs $5/$25).
+- **Unknown models** fall back by tier (`opus` / `sonnet` / `haiku`) rather
+  than silently costing zero.
+
+Cache reads bill at `cache_read_multiplier` (0.1×). Legacy model rates are
+best-effort; current-model rates are list prices and will drift when Anthropic
+changes pricing.
 
 ## Implementation notes
 

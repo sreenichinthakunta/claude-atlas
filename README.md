@@ -24,6 +24,7 @@ Folder-structure navigation for your Claude **chats** and **code projects**, wit
 right-side panel visualizing how each Claude model is consuming tokens.
 
 - `/atlas` — build and open the dashboard (nav tree left, detail centre, token panel right)
+- `/atlas-savings` — cheaper-model suggestions with the evidence behind each
 - `/atlas-tokens [model|project|session]` — same breakdown as terminal bars
 - `/atlas-tree [project]` — folder structure and sessions for one project
 - optional statusline showing live tokens, cache hit rate, and estimated cost

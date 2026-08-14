@@ -1,8 +1,8 @@
 {
   "name": "claude-atlas",
   "displayName": "Claude Atlas",
-  "description": "Navigate your Claude chats and code projects as a folder tree, with a right-side panel visualizing how each Claude model consumes tokens.",
-  "version": "1.0.0",
+  "description": "Navigate Claude chats and code projects as a folder tree, with a right-side token panel, rich filters, and evidence-backed suggestions for where a cheaper model would do.",
+  "version": "1.1.0",
   "author": {
     "name": "Sreeni Chinthakunta",
     "url": "https://github.com/sreenichinthakunta"
@@ -13,6 +13,8 @@
     "tokens",
     "usage",
     "cost",
+    "savings",
+    "optimization",
     "navigation",
     "dashboard",
     "analytics"
