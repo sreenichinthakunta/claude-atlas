@@ -637,6 +637,21 @@ function savingsSection(list,expanded){
     h+=`<div class="note">+${recs.length-show.length} more — open the Savings tab or narrow filters.</div>`;
   return h+"</div>";
 }
+function toolBreakdown(tools){
+  const rows=Object.entries(tools||{}).sort((a,b)=>b[1]-a[1]);
+  if(!rows.length) return '<div class="empty">No tool calls recorded.</div>';
+  const total=rows.reduce((a,[,v])=>a+v,0), mx=rows[0][1];
+  const top=rows.slice(0,20);
+  let h=top.map(([name,c])=>`<div class="mrow">
+    <div class="mtop"><b title="${esc(name)}">${esc(name)}</b><span>${num(c)}</span></div>
+    <div class="bar" style="width:${(c/mx*100).toFixed(1)}%"><i style="width:100%;background:var(--accent)"></i></div>
+  </div>`).join("");
+  if(rows.length>top.length){
+    const rest=rows.slice(top.length).reduce((a,[,v])=>a+v,0);
+    h+=`<div class="note">+${rows.length-top.length} more tools, ${num(rest)} calls not shown.</div>`;
+  }
+  return `<div class="tag" style="margin-bottom:8px">${num(total)} calls · ${rows.length} distinct tools</div>${h}`;
+}
 function leversSection(){
   const L=DATA.levers||[];
   if(!L.length) return "";
@@ -909,6 +924,7 @@ function renderMain(){
     h+=`<div class="card"><h2>${esc(s.title||"Untitled session")}</h2>
       <div class="path">${esc(sc.project.path)}${s.branch?" · branch "+esc(s.branch):""}</div>${kpis(sc)}</div>`;
     if(s.recommendation) h+=`<div class="card"><h3>Suggestion</h3>${recCard(s,sc.project)}</div>`;
+    h+=`<div class="card"><h3>Tool calls</h3>${toolBreakdown(s.tools)}</div>`;
     h+=`<div class="card"><h3>Details</h3><table><tbody>
       <tr><td>Session id</td><td class="n">${esc(s.id)}</td></tr>
       <tr><td>Transcript</td><td class="n">${bytes(s.size_bytes)}</td></tr>
@@ -925,6 +941,7 @@ function renderMain(){
     h+=`<div class="card"><h2>${esc(sc.title)}</h2><div class="path">${esc(sc.sub)}</div>${kpis(sc)}</div>`;
     h+=savingsSection(list);
     if(sel.kind==="all") h+=leversSection();
+    h+=`<div class="card"><h3><span>Tool calls</span><span>${Object.keys(sc.tools||{}).length} distinct</span></h3>${toolBreakdown(sc.tools)}</div>`;
     h+=sessionTable(list);
   }
   const main=document.getElementById("main");
@@ -1073,6 +1090,72 @@ renderAll();
 </html>
 """
 
+# A placeholder Context/Access inventory, structurally identical to what
+# inspect_env.collect() returns. Used by --demo so a dashboard can be built
+# for a screenshot or a shared demo without embedding this machine's real
+# MCP servers, memory file names, or permission rules. Every name here is
+# deliberately generic and fictional.
+DEMO_ENV = {
+    "mcp": {
+        "servers": [
+            {"name": "github", "scope": "user", "source": "~/.claude.json", "type": "stdio",
+             "url": None, "command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"],
+             "env_keys": ["GITHUB_TOKEN"], "env_secret_count": 1, "header_keys": []},
+            {"name": "linear", "scope": "project", "source": "project-file (.mcp.json)",
+             "type": "url", "url": "https://mcp.linear.app/sse", "command": None, "args": [],
+             "env_keys": [], "env_secret_count": 0, "header_keys": ["Authorization"],
+             "project": "/Users/demo/acme-webapp"},
+        ],
+        "projects": [
+            {"path": "/Users/demo/acme-webapp", "exists": True, "trusted": True,
+             "allowed_tools": ["Bash", "Edit", "Read"], "enabled_mcpjson": ["linear"],
+             "disabled_mcpjson": [], "context_uris": [], "external_includes_approved": True,
+             "server_count": 1},
+            {"path": "/Users/demo/internal-tools", "exists": True, "trusted": True,
+             "allowed_tools": ["Bash", "Read"], "enabled_mcpjson": [], "disabled_mcpjson": [],
+             "context_uris": [], "external_includes_approved": False, "server_count": 0},
+        ],
+        "notes": [],
+    },
+    "memories": {
+        "groups": [{
+            "dir": "~/.claude/projects/acme-webapp/memory", "project_id": "acme-webapp",
+            "count": 3, "bytes": 4200, "has_index": True,
+            "files": [
+                {"file": "MEMORY.md", "name": "MEMORY", "description": "Index",
+                 "type": "", "links": ["deploy-process", "auth-notes"], "size": 800,
+                 "mtime": 0, "is_index": True, "body": "", "raw": ""},
+                {"file": "deploy-process.md", "name": "deploy-process",
+                 "description": "How staging and production deploys work", "type": "",
+                 "links": [], "size": 1600, "mtime": 0, "is_index": False, "body": "", "raw": ""},
+                {"file": "auth-notes.md", "name": "auth-notes",
+                 "description": "OAuth flow quirks and token refresh timing", "type": "",
+                 "links": [], "size": 1800, "mtime": 0, "is_index": False, "body": "", "raw": ""},
+            ],
+        }],
+        "total": 3, "globals": [], "dangling_links": [], "secret_flags": [],
+    },
+    "access": {
+        "rules": [],
+        "sources": [
+            {"path": "~/.claude/settings.json", "label": "user", "managed": False,
+             "keys": ["enabledPlugins", "extraKnownMarketplaces"]},
+            {"path": "/Users/demo/acme-webapp/.claude/settings.local.json",
+             "label": "project-local: /Users/demo/acme-webapp", "managed": False,
+             "keys": ["permissions"]},
+        ],
+        "hooks": [], "counts": {"allow": 42, "deny": 3, "ask": 1},
+        "trusted_dirs": [{"path": "/Users/demo/acme-webapp", "exists": True},
+                         {"path": "/Users/demo/internal-tools", "exists": True}],
+        "statusline": True, "enabled_plugins": ["claude-atlas@demo"],
+        "marketplaces": ["demo-marketplace"], "env_keys": [],
+        "findings": [
+            {"level": "info", "text": "3 deny rules configured — a durable guardrail is in place."},
+            {"level": "info", "text": "2 directories are trusted."},
+        ],
+    },
+}
+
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Render the Claude Atlas dashboard.")
@@ -1080,6 +1163,9 @@ def main() -> int:
     ap.add_argument("--out", default=str(Path.home() / ".claude" / "atlas" / "dashboard.html"))
     ap.add_argument("--open", action="store_true")
     ap.add_argument("--no-tree", action="store_true")
+    ap.add_argument("--demo", action="store_true",
+                    help="embed placeholder MCP/memory/access data instead of this "
+                         "machine's real state -- for screenshots or sharing a demo")
     args = ap.parse_args()
 
     here = Path(__file__).resolve().parent
@@ -1093,16 +1179,19 @@ def main() -> int:
 
     # Environment inventory is embedded so the static file works standalone;
     # live mode re-fetches it from /api/env for fresh state.
-    try:
-        sys.path.insert(0, str(here))
-        import inspect_env
-        env_raw = json.dumps(inspect_env.collect(), separators=(",", ":"))
-    except Exception as exc:  # never let inventory failure break the dashboard
-        env_raw = json.dumps({"error": str(exc), "mcp": {"servers": [], "projects": [], "notes": []},
-                              "memories": {"groups": [], "total": 0, "globals": [], "dangling_links": []},
-                              "access": {"rules": [], "sources": [], "hooks": [], "findings": [],
-                                         "counts": {"allow": 0, "deny": 0, "ask": 0},
-                                         "trusted_dirs": [], "enabled_plugins": [], "marketplaces": []}})
+    if args.demo:
+        env_raw = json.dumps(DEMO_ENV, separators=(",", ":"))
+    else:
+        try:
+            sys.path.insert(0, str(here))
+            import inspect_env
+            env_raw = json.dumps(inspect_env.collect(), separators=(",", ":"))
+        except Exception as exc:  # never let inventory failure break the dashboard
+            env_raw = json.dumps({"error": str(exc), "mcp": {"servers": [], "projects": [], "notes": []},
+                                  "memories": {"groups": [], "total": 0, "globals": [], "dangling_links": []},
+                                  "access": {"rules": [], "sources": [], "hooks": [], "findings": [],
+                                             "counts": {"allow": 0, "deny": 0, "ask": 0},
+                                             "trusted_dirs": [], "enabled_plugins": [], "marketplaces": []}})
 
     html = (TEMPLATE
             .replace("__DATA__", raw.replace("</", "<\\/"))

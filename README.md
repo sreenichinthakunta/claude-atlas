@@ -23,7 +23,12 @@ Update later with `/plugin marketplace update sreeni-plugins`.
 Folder-structure navigation for your Claude **chats** and **code projects**, with a
 right-side panel visualizing how each Claude model is consuming tokens.
 
+![Claude Atlas screenshot](plugins/claude-atlas/docs/screenshot.png)
+
+*Synthetic demo data — see [the plugin README](plugins/claude-atlas/README.md#screenshot).*
+
 - `/atlas` — build and open the dashboard (nav tree left, detail centre, token panel right)
+- `/atlas-edit` — start the local server so memory files can be edited in place
 - `/atlas-savings` — cheaper-model suggestions with the evidence behind each
 - `/atlas-tokens [model|project|session]` — same breakdown as terminal bars
 - `/atlas-tree [project]` — folder structure and sessions for one project
